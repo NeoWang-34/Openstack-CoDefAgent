@@ -9,7 +9,7 @@ class Detector:
 	__cnt = {}
 	__lastTime = {}
 	blacklist = []
-	cntTime = 4.0
+	cntTime = 2.0
 	cntLimit = 20
 	ddosTCPBitmask = [0, 1, 3, 5, 6, 8, 32, 41]
 
