@@ -5,9 +5,8 @@ import time
 import sys
 from threading import Thread
 
-l = [0] * 100
+l = [0] * 5
 cnt = -1
-tot = 0
 
 def udptest(addr, i):
 
@@ -16,10 +15,8 @@ def udptest(addr, i):
 	# t = time.time()
 	s.sendto(' '.encode(), addr)
 	global cnt
-	global tot
 	global l
-	cnt = (cnt+1)%100
-	if tot < 100:	tot += 1
+	cnt += 1
 
 	try:
 		s.recv(1)
@@ -28,20 +25,17 @@ def udptest(addr, i):
 	except:
 		# print( i, 'timeout')
 		l[cnt] = 0
-	finally:
-		print(sum(l)/tot*100,'%')
-		#print(sum(l),tot)
-
-# [ udptest(i) for i in range(10) ]
-# exit()
+	
 
 addr = (sys.argv[1], 2323)
-st = time.time()
 while 1:
-	cur = time.time()
-	if cur - st >= 20:
-		break
-	pool = [ Thread(target=udptest,args=(addr, i,)) for i in range(50) ]
+	l = [0] * 5
+	cnt = -1
+	pool = [ Thread(target=udptest,args=(addr, i,)) for i in range(5) ]
 	for p in pool:
 		p.start()
-		time.sleep(0.1)
+		time.sleep(0.2)
+	ans = str(sum(l)/5*100)+'%'
+	print('\r'+ans,end='')
+	with open('/home/ubuntu/msg.txt', 'w') as fp:
+		fp.write(ans)

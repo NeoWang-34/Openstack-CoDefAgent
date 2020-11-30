@@ -16,15 +16,15 @@ class Client:
 	def __init__(self, clientIp, clientPort, serverIp, serverPort):
 		# set cuid
 		self.__cuid = clientIp + ':' + str(clientPort)
-		
+
 		# recovery saved whitelist
 		with open('whitelist.json', 'r', encoding='utf8') as fp:
 			self.__whitelist = json.load(fp)
-		
+
 		# connect to the server
 		self.__clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.__clientSocket.connect((serverIp, serverPort))
-		
+
 		# print whether the client has connect to the server
 		print(self.__clientSocket.recv(1024).decode(encoding='utf8') + '\n')
 
@@ -39,7 +39,7 @@ class Client:
 		create a thread to establish new detector connection
 		'''
 		while True:
-			
+
 			# accept a detector
 			detectorSocket, detectorAddr = self.__bindedSocket.accept()
 			self.__detectorPool[detectorAddr] = detectorSocket
@@ -53,14 +53,14 @@ class Client:
 
 	def __recvDetectorMsg(self, detectorSocket, detectorAddr):
 		'''
-		create a thread to receive messages from each detector 
+		create a thread to receive messages from each detector
 		'''
 		while True:
 			try:
 				msg = recvMsg(detectorSocket)
 				if msg == None:
 					raise Exception('receive empty message.')
-				
+
 				# choose measures according to the message
 				if msg['command'] == 'Match':
 					if 'bitmask' in msg['condition2']:
@@ -81,6 +81,8 @@ class Client:
 		'''
 		filtering rules install
 		'''
+		with open('/home/ubuntu/msg.txt', 'w') as fp:
+			fp.write('客户端agent收到攻击信息，选择并发送缓解请求...')
 		jd = {}
 		head = {}
 		head['Type'] = 'PUT'
@@ -107,7 +109,7 @@ class Client:
 		jd['Head'] = head
 		jd['Data'] = data
 		return jd
-	
+
 	def __handleMatch(self, bitmask):
 		if bitmask in self.ddosTCPBitmask:
 			return self.ddosTCPBitmask[bitmask]+ '-' + str(time.time())
@@ -123,7 +125,7 @@ class Client:
 			except Exception as e:
 				print(e)
 				break
-	
+
 	def handleCMD(self):
 		'''
 		handle command in Client
@@ -160,7 +162,7 @@ class Client:
 
 
 if __name__ == '__main__':
-	
+
 	client = Client(getHostIp(), int(sys.argv[1]), sys.argv[2], int(sys.argv[3]))
 	Thread(target=client.acceptDetector).start()
 	Thread(target=client.recvFromServer).start()

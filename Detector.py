@@ -27,7 +27,7 @@ class Detector:
 		sniff received TCP messages
 		'''
 		sniff(filter="ip dst %s and tcp" % getHostIp(), prn=self.__handleTCP, count=0)
-	
+
 	def __handleTCP(self, packet):
 		'''
 		handle received TCP messages\n
@@ -50,6 +50,8 @@ class Detector:
 		self.__lastTime[ip] = cur
 		if self.__cnt[ip] > self.cntLimit:
 			self.blacklist.append(ip)
+			with open('/home/ubuntu/msg.txt', 'w') as fp:
+				fp.write('检测agent检测到DDos攻击，发送攻击信息...')
 			self.__findTCPDDos('Match', packet[IP].src, packet[IP].dst,\
 				{'protocol':'TCP'}, packet[TCP].sport, packet[TCP].dport,\
 					{'bitmask':'Match %d'%int(packet[TCP].flags)})
@@ -66,6 +68,6 @@ class Detector:
 		sendMsg(msg, self.__detectorSocket)
 
 if __name__ == '__main__':
-	
+
 	detector = Detector(sys.argv[1],int(sys.argv[2]))
 	detector.sniffTCP()

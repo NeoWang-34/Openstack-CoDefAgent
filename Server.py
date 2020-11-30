@@ -18,11 +18,11 @@ class Server:
 		self.routerIP = routerIP
 		self.getNetworkInformation()
 		# bind socket for communicating with clients
-		self.__serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    
+		self.__serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.__serverSocket.bind((serverIp, serverPort))
 		self.__serverSocket.listen(20)
 		print("server start，wait for client connecting...\n")
-	
+
 	def getNetworkInformation(self):
 		routers = {}
 		subnets = {}
@@ -49,7 +49,7 @@ class Server:
 
 	def __recvClientMsg(self, clientSocket, clientAddr):
 		'''
-		create a thread to receive messages from each client 
+		create a thread to receive messages from each client
 		'''
 		while True:
 			try:
@@ -70,15 +70,21 @@ class Server:
 				break
 
 	def __filteringRulesInstall(self, recvjd):
+		with open('/home/ubuntu/msg.txt', 'w') as fp:
+			fp.write('服务器agent收到缓解请求，执行缓解响应...')
 		srcIp = recvjd['Data']['Ipv4Match']['srcIp']
 		dstIp = recvjd['Data']['Ipv4Match']['dstIp']
 		flags = recvjd['Data']['TcpMatch']['bitmask']
 		dstRouter = self.routers[ self.subnets[toSubnet(dstIp, 24)] ]
 		srcRouter = self.routers[ self.subnets[toSubnet(srcIp, 24)] ]
 		time.sleep(3)
-		setFilterRule(dstRouter, sourIp, self.ddosTCPBitmask[flags], "drop", "input")
+		with open('/home/ubuntu/msg.txt', 'w') as fp:
+			fp.write('部署末端路由器进行流量清洗过滤...')
+		setFilterRule(dstRouter, srcIp, self.ddosTCPBitmask[flags], "drop", "forward")
 		time.sleep(3)
-		setFilterRule(srcRouter, sourIp, self.ddosTCPBitmask[flags], "drop", "input")
+		with open('/home/ubuntu/msg.txt', 'w') as fp:
+			fp.write('部署上游路由器协同进行流量清洗过滤...')
+		setFilterRule(srcRouter, srcIp, self.ddosTCPBitmask[flags], "drop", "forward")
 		jd = {}
 		head = {}
 		head['Type'] = 'CREATED'
@@ -88,7 +94,7 @@ class Server:
 		return jd
 
 if __name__ == '__main__':
-	
-	routerIP = ['192.168.0.158', '192.168.0.133']
+
+	routerIP = sys.argv[2:]
 	server = Server(getHostIp(), int(sys.argv[1]), routerIP)
 	Thread(target=server.acceptClient).start()

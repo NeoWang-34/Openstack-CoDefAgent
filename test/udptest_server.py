@@ -11,18 +11,18 @@ def deadloop(addr):
 	while True:
 		time.sleep(0.0001)
 		cur = time.time()
-		if cur - st >= 20:
+		if cur - st >= 5:
 			break
 	l.remove(addr)
- 
+
 
 def reply(req, addr):
 	serv.sendto('1'.encode(), addr)
 	if addr not in l:
 		Process(target=deadloop,args=(addr,)).start()
-		
 
 
+print('start...')
 serv = DatagramServer(('0.0.0.0', 2323), reply)
 serv.serve_forever()
 # import socket
